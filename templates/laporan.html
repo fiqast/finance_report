@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Keuangan</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Laporan Keuangan Bulanan</h1>
+        </header>
+
+        <main>
+            <!-- Bagian Tabel -->
+            <section class="table-section">
+                <h2>Detail Laporan Bulanan</h2>
+                <table border="1" cellspacing="0" cellpadding="8">
+                    <thead>
+                        <tr>
+                            <th>Bulan</th>
+                            <th>Pemasukan</th>
+                            <th>Pengeluaran</th>
+                            <th>Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bulan, data in laporan.items() %}
+                        <tr>
+                            <td>{{ bulan }}</td>
+                            <td>Rp {{ "{:,.0f}".format(data['Pemasukan'] or 0) }}</td>
+                            <td>Rp {{ "{:,.0f}".format(data['Pengeluaran'] or 0) }}</td>
+                            <td>Rp {{ "{:,.0f}".format((data['Pemasukan'] or 0) - (data['Pengeluaran'] or 0)) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Bagian Chart -->
+            <section class="chart-section">
+                <h2>Grafik Laporan Bulanan</h2>
+                <canvas id="keuanganChart" width="400" height="400"></canvas>
+            </section>
+
+            <footer>
+                <a href="/">Kembali ke Beranda</a>
+            </footer>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Data untuk laporan bulanan
+        const laporanData = {{ laporan | tojson }};
+    
+        // Menghitung total pemasukan dan pengeluaran untuk seluruh bulan
+        const totalPemasukan = Object.values(laporanData).reduce((sum, bulan) => sum + (bulan['Pemasukan'] || 0), 0);
+        const totalPengeluaran = Object.values(laporanData).reduce((sum, bulan) => sum + (bulan['Pengeluaran'] || 0), 0);
+    
+        // Konfigurasi Pie Chart
+        const ctx = document.getElementById('keuanganChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Pemasukan', 'Pengeluaran'],
+                datasets: [{
+                    data: [totalPemasukan, totalPengeluaran],
+                    backgroundColor: ['#4caf50', '#f44336'],
+                    borderColor: ['#388e3c', '#d32f2f'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2.0,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                const label = tooltipItem.label || '';
+                                const value = tooltipItem.raw;
+                                return `${label}: Rp ${value.toLocaleString('id-ID')}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    
+</body>
+</html>

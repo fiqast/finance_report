@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengelolaan Keuangan Mahasiswa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pengelolaan Keuangan Mahasiswa</h1>
+            <div id="saldo">
+                <h3>Saldo Saat Ini: Rp. <span id="currentSaldo">{{ saldo }}</span></h3>
+            </div>
+        </header>
+
+        <main>
+            <section class="form-section">
+                <h2>Tambah Transaksi</h2>
+                <form action="/tambah_transaksi" method="POST">
+                    <input type="date" name="tanggal" required>
+
+                    <!-- Dropdown untuk memilih Pemasukan atau Pengeluaran -->
+                    <select name="tipe" id="tipeTransaksi" onchange="updateCategoryOptions()" required>
+                        <option value="">Pilih Tipe Transaksi</option>
+                        <option value="Pemasukan">Pemasukan</option>
+                        <option value="Pengeluaran">Pengeluaran</option>
+                    </select>
+
+                    <!-- Dropdown untuk memilih kategori (akan berubah berdasarkan tipe transaksi) -->
+                    <select name="kategori" id="kategoriSelect" required>
+                        <option value="">Pilih Kategori</option>
+                    </select>
+
+                    <!-- Kolom input untuk kategori custom, disembunyikan secara default -->
+                    <input type="text" name="kategori_kustom" id="kategoriKustomInput" placeholder="Masukkan kategori baru" style="display:none;">
+
+                    <input type="number" name="jumlah" placeholder="Jumlah" required>
+                    <input type="text" name="keterangan" placeholder="Keterangan" required>
+                    <button type="submit">Tambah Transaksi</button>
+                </form>
+            </section>
+
+            <section class="table-section">
+                <h2>Daftar Transaksi</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Kategori</th>
+                            <th>Tipe</th>
+                            <th>Jumlah</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaksi in transaksi %}
+                        <tr>
+                            <td>{{ transaksi['tanggal'] }}</td>
+                            <td>
+                                {% if transaksi['kategori'] %}
+                                    {{ transaksi['kategori'] }}
+                                {% else %}
+                                    Tidak ada kategori
+                                {% endif %}
+                            </td>
+                            <td>{{ transaksi['tipe'] }}</td>
+                            <td>{{ transaksi['jumlah'] }}</td>
+                            <td>{{ transaksi['keterangan'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+
+        <footer>
+            <a href="/laporan">Lihat Laporan Keuangan</a>
+        </footer>
+    </div>
+
+    <!-- Menghubungkan file JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
